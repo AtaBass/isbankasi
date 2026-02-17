@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
   View,
   Text,
@@ -10,34 +10,30 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, RADIUS } from '../../constants/theme';
-import { ai as api } from '../../lib/api';
 
 const BG_LIGHT = '#f5f6f8';
 const TEXT_MAIN = '#101318';
 const TEXT_MUTED = '#5e6d8d';
 
-const BAR_HEIGHTS = [0.5, 0.75, 1, 0.67, 0.5, 0.33, 0.75]; // Today = index 2 (full)
-const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const CHAT_SAMPLE = [
+  {
+    soru: "AVM'deyim, İş Bankası'nın hangi kampanyalarından yararlanabilirim?",
+    cevap: "Şu anda seçili yemek markalarında %10 cashback ve bazı giyim mağazalarında 500₺ üzeri harcamaya bonus fırsatı bulunuyor. Ayrıca sinema harcamalarında taksit avantajı var. İstersen sana en avantajlı kampanyayı filtreleyebilirim.",
+  },
+  {
+    soru: 'Bu ay eğlence harcamalarım ne durumda?',
+    cevap: "Bu ay eğlence kategorisinde geçen aya göre %18 daha fazla harcama yaptın. Belirlediğin bütçenin 750₺ üzerindesin. İstersen kalan günler için harcama limiti belirleyelim veya tasarruf planı oluşturalım.",
+  },
+];
 
 export default function AIBuddyScreen() {
-  const [insights, setInsights] = useState([]);
   const [query, setQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
 
-  const load = async () => {
-    try {
-      const data = await api.insights();
-      setInsights(Array.isArray(data) ? data : []);
-    } catch (e) {
-      setInsights([]);
-    } finally {
-      setRefreshing(false);
-    }
+  const onRefresh = () => {
+    setRefreshing(true);
+    setTimeout(() => setRefreshing(false), 400);
   };
-
-  useEffect(() => {
-    load();
-  }, []);
 
   return (
     <View style={styles.wrapper}>
@@ -45,7 +41,7 @@ export default function AIBuddyScreen() {
         style={styles.container}
         contentContainerStyle={styles.content}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
         {/* Header */}
@@ -54,9 +50,7 @@ export default function AIBuddyScreen() {
             <Ionicons name="menu" size={24} color={TEXT_MAIN} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>İş-Gen AI Buddy</Text>
-          <TouchableOpacity style={styles.headerBtn}>
-            <Ionicons name="notifications" size={24} color={COLORS.primary} />
-          </TouchableOpacity>
+          <View style={styles.headerBtn} />
         </View>
 
         {/* AI Avatar & Welcome */}
@@ -67,111 +61,47 @@ export default function AIBuddyScreen() {
             </View>
             <View style={styles.statusDot} />
           </View>
-          <Text style={styles.heroTitle}>Hi, I'm your AI Buddy</Text>
+          <Text style={styles.heroTitle}>Merhaba, ben senin AI asistanınım</Text>
           <Text style={styles.heroSubtitle}>
-            Analyzing your finances in real-time. Here's what I found today.
+            Finanslarını anlık analiz ediyorum. İşte bugünkü bulgular.
           </Text>
         </View>
 
-        {/* Spending Patterns */}
+        {/* Sohbet - Soru / Cevap */}
         <View style={styles.section}>
-          <View style={styles.patternCard}>
-            <View style={styles.patternHeader}>
-              <Text style={styles.patternLabel}>SPENDING PATTERNS</Text>
-              <View style={styles.weeklyPill}>
-                <Text style={styles.weeklyPillText}>Weekly View</Text>
+          <Text style={styles.chatSectionTitle}>Sohbet</Text>
+          {CHAT_SAMPLE.map((item, idx) => (
+            <View key={idx} style={styles.chatBlock}>
+              <Text style={styles.chatSoruLabel}>Soru:</Text>
+              <View style={styles.chatSoruBox}>
+                <Text style={styles.chatSoruText}>{item.soru}</Text>
+              </View>
+              <Text style={styles.chatCevapLabel}>Cevap:</Text>
+              <View style={styles.chatCevapBox}>
+                <Text style={styles.chatCevapText}>{item.cevap}</Text>
               </View>
             </View>
-            <View style={styles.chart}>
-              {BAR_HEIGHTS.map((h, i) => (
-                <View key={i} style={styles.barCol}>
-                  {i === 2 && <Text style={styles.todayLabel}>Today</Text>}
-                  <View
-                    style={[
-                      styles.bar,
-                      { height: `${h * 100}%` },
-                      i === 2 && styles.barToday,
-                    ]}
-                  />
-                </View>
-              ))}
-            </View>
-            <View style={styles.dayLabels}>
-              {DAYS.map((d) => (
-                <Text key={d} style={styles.dayLabel}>{d}</Text>
-              ))}
-            </View>
-          </View>
+          ))}
         </View>
 
-        {/* Daily Insights */}
-        <View style={styles.section}>
-          <View style={styles.insightHeader}>
-            <Text style={styles.insightSectionTitle}>Daily Insights</Text>
-            <TouchableOpacity>
-              <Text style={styles.viewAllBtn}>VIEW ALL</Text>
-            </TouchableOpacity>
-          </View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.insightScroll}>
-            <View style={styles.insightCard}>
-              <View style={styles.insightIconAmber}>
-                <Ionicons name="cafe" size={24} color="#d97706" />
-              </View>
-              <Text style={styles.insightCardTitle}>Coffee Spending</Text>
-              <Text style={styles.insightCardText}>
-                You spent <Text style={styles.textRed}>20% more</Text> on Coffee this week compared to last.
-              </Text>
-            </View>
-            <View style={styles.insightCard}>
-              <View style={styles.insightIconBlue}>
-                <Ionicons name="wallet" size={24} color={COLORS.primary} />
-              </View>
-              <Text style={styles.insightCardTitle}>Smart Tip</Text>
-              <Text style={styles.insightCardText}>
-                You could save <Text style={styles.textPrimary}>$30/mo</Text> by switching your current phone plan.
-              </Text>
-            </View>
-            <View style={styles.insightCard}>
-              <View style={styles.insightIconGreen}>
-                <Ionicons name="flash" size={24} color="#16a34a" />
-              </View>
-              <Text style={styles.insightCardTitle}>Streak Unlocked</Text>
-              <Text style={styles.insightCardText}>
-                Great job! You've hit a <Text style={styles.textGreen}>7-day saving streak</Text>. Keep it up!
-              </Text>
-            </View>
-          </ScrollView>
-        </View>
-
-        {/* Quick Actions Chat Style */}
-        <View style={styles.section}>
-          <View style={styles.bubbleWrap}>
-            <View style={styles.chatBubble}>
-              <Text style={styles.chatBubbleText}>
-                How can I help you manage your budget today? Try asking about your subscriptions.
-              </Text>
-            </View>
-            <View style={styles.quickWrap}>
-              <TouchableOpacity style={styles.quickBtn}>
-                <Text style={styles.quickBtnText}>Analyze my rent 🏠</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.quickBtn}>
-                <Text style={styles.quickBtnText}>Top expenses 💸</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.quickBtn}>
-                <Text style={styles.quickBtnText}>Spending goals 🎯</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
       </ScrollView>
 
-      {/* Sticky Input + Nav area - input only here, nav is in _layout */}
+      {/* Sticky: Öneri al / Uyarı yap baloncukları + chat input */}
       <View style={styles.inputSection}>
+        <View style={styles.actionBubblesWrap}>
+          <TouchableOpacity style={styles.actionBubble} activeOpacity={0.8}>
+            <Ionicons name="bulb-outline" size={20} color={COLORS.primary} />
+            <Text style={styles.actionBubbleText}>Öneri al</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.actionBubbleWarn} activeOpacity={0.8}>
+            <Ionicons name="warning-outline" size={20} color="#b91c1c" />
+            <Text style={styles.actionBubbleTextWarn}>Uyarı ver modu</Text>
+          </TouchableOpacity>
+        </View>
         <View style={styles.inputRow}>
           <TextInput
             style={styles.input}
-            placeholder="Ask Buddy about your finances..."
+            placeholder="Finansların hakkında Buddy'ye sor..."
             placeholderTextColor={TEXT_MUTED}
             value={query}
             onChangeText={setQuery}
@@ -188,7 +118,7 @@ export default function AIBuddyScreen() {
 const styles = StyleSheet.create({
   wrapper: { flex: 1, backgroundColor: BG_LIGHT },
   container: { flex: 1 },
-  content: { paddingBottom: 100 },
+  content: { paddingBottom: 80 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -233,82 +163,57 @@ const styles = StyleSheet.create({
   heroTitle: { fontSize: 20, fontWeight: '700', color: TEXT_MAIN },
   heroSubtitle: { fontSize: 14, color: TEXT_MUTED, marginTop: 4, textAlign: 'center', paddingHorizontal: 16 },
   section: { paddingHorizontal: 16, marginTop: 16 },
-  patternCard: {
-    backgroundColor: COLORS.surface,
-    borderWidth: 1,
-    borderColor: '#f3f4f6',
-    padding: 16,
-    borderRadius: RADIUS.xl,
-  },
-  patternHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
-  patternLabel: { fontSize: 12, fontWeight: '700', color: '#9ca3af', letterSpacing: 1 },
-  weeklyPill: { backgroundColor: 'rgba(0,51,153,0.1)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: RADIUS.full },
-  weeklyPillText: { fontSize: 12, fontWeight: '600', color: COLORS.primary },
-  chart: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'space-between',
-    height: 128,
-    gap: 8,
-    paddingHorizontal: 8,
-  },
-  barCol: { flex: 1, alignItems: 'center', justifyContent: 'flex-end' },
-  todayLabel: { position: 'absolute', top: -24, fontSize: 10, fontWeight: '700', color: COLORS.primary },
-  bar: {
-    width: '100%',
-    minHeight: 4,
-    backgroundColor: '#e5e7eb',
-    borderTopLeftRadius: 4,
-    borderTopRightRadius: 4,
-  },
-  barToday: { backgroundColor: COLORS.primary },
-  dayLabels: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 8, paddingHorizontal: 4 },
-  dayLabel: { flex: 1, fontSize: 10, fontWeight: '500', color: '#9ca3af', textAlign: 'center' },
-  insightHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  insightSectionTitle: { fontSize: 18, fontWeight: '700', color: TEXT_MAIN },
-  viewAllBtn: { fontSize: 12, fontWeight: '700', color: COLORS.primary, letterSpacing: 0.5 },
-  insightScroll: { flexDirection: 'row', gap: 16, paddingBottom: 16 },
-  insightCard: {
-    width: 256,
-    flexShrink: 0,
-    backgroundColor: COLORS.surface,
-    borderWidth: 1,
-    borderColor: '#f3f4f6',
-    padding: 16,
-    borderRadius: RADIUS.xl,
-  },
-  insightIconAmber: { width: 40, height: 40, borderRadius: 8, backgroundColor: '#fffbeb', justifyContent: 'center', alignItems: 'center', marginBottom: 12 },
-  insightIconBlue: { width: 40, height: 40, borderRadius: 8, backgroundColor: '#eff6ff', justifyContent: 'center', alignItems: 'center', marginBottom: 12 },
-  insightIconGreen: { width: 40, height: 40, borderRadius: 8, backgroundColor: '#f0fdf4', justifyContent: 'center', alignItems: 'center', marginBottom: 12 },
-  insightCardTitle: { fontWeight: '700', fontSize: 16, color: TEXT_MAIN },
-  insightCardText: { fontSize: 14, color: TEXT_MUTED, marginTop: 4, lineHeight: 20 },
-  textRed: { color: '#ef4444', fontWeight: '600' },
-  textPrimary: { color: COLORS.primary, fontWeight: '600' },
-  textGreen: { color: '#16a34a', fontWeight: '600' },
-  bubbleWrap: { marginTop: 8 },
-  chatBubble: {
-    alignSelf: 'flex-start',
-    maxWidth: '85%',
-    backgroundColor: 'rgba(0,51,153,0.05)',
-    borderWidth: 1,
-    borderColor: 'rgba(0,51,153,0.1)',
-    padding: 16,
-    borderTopLeftRadius: 0,
-    borderTopRightRadius: RADIUS.xl,
-    borderBottomLeftRadius: RADIUS.xl,
-    borderBottomRightRadius: RADIUS.xl,
-  },
-  chatBubbleText: { fontSize: 14, color: TEXT_MAIN },
-  quickWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 12 },
-  quickBtn: {
+  chatSectionTitle: { fontSize: 18, fontWeight: '700', color: TEXT_MAIN, marginBottom: 16 },
+  chatBlock: { marginBottom: 24 },
+  chatSoruLabel: { fontSize: 12, fontWeight: '700', color: COLORS.primary, marginBottom: 6 },
+  chatSoruBox: {
     backgroundColor: COLORS.surface,
     borderWidth: 1,
     borderColor: '#e5e7eb',
+    padding: 14,
+    borderRadius: RADIUS.lg,
+    marginBottom: 12,
+  },
+  chatSoruText: { fontSize: 14, color: TEXT_MAIN, lineHeight: 20 },
+  chatCevapLabel: { fontSize: 12, fontWeight: '700', color: '#16a34a', marginBottom: 6 },
+  chatCevapBox: {
+    backgroundColor: 'rgba(0,51,153,0.06)',
+    borderWidth: 1,
+    borderColor: 'rgba(0,51,153,0.12)',
+    padding: 14,
+    borderRadius: RADIUS.lg,
+  },
+  chatCevapText: { fontSize: 14, color: TEXT_MAIN, lineHeight: 22 },
+  actionBubblesWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginBottom: 12,
+  },
+  actionBubble: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: RADIUS.full,
+    backgroundColor: 'rgba(0,51,153,0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(0,51,153,0.15)',
   },
-  quickBtnText: { fontSize: 12, fontWeight: '600', color: '#374151' },
+  actionBubbleText: { fontSize: 14, fontWeight: '600', color: COLORS.primary },
+  actionBubbleWarn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: RADIUS.full,
+    backgroundColor: 'rgba(185,28,28,0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(185,28,28,0.2)',
+  },
+  actionBubbleTextWarn: { fontSize: 14, fontWeight: '600', color: '#b91c1c' },
   inputSection: {
     position: 'absolute',
     bottom: 0,
@@ -318,8 +223,8 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#f3f4f6',
     paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 80,
+    paddingTop: 12,
+    paddingBottom: 28,
   },
   inputRow: {
     flexDirection: 'row',

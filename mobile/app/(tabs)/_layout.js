@@ -56,7 +56,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="tasks"
         options={{
-          title: 'Tasks',
+          title: 'Görevler',
           tabBarIcon: ({ color, size }) => <Ionicons name="reader" size={size} color={color} />,
         }}
       />

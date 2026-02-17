@@ -4,16 +4,15 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Dimensions,
   ImageBackground,
+  Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, RADIUS } from '../../constants/theme';
 import { reels as reelsApi, rewards as rewardsApi } from '../../lib/api';
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
-
-const REEL_IMAGE = 'https://lh3.googleusercontent.com/aida-public/AB6AXuBo50TFSESMtFGu3Tz5Px1KLW9ZyViiSL7T13jMlzzxOxqKkpYiHjvNB1id5IWCOTrJVSGt98kQU33sUn3wj2N0QTlgxNahJqrifRRYKiSpc82GBiP9p3OSA0oT3z6fdofijzb9wcikMcX1FDX6bfs4PAgidb6sX8EiyLAbmrP1wsyMbLuY7N3ZUqE4nF2JzpOScbZevNGd1gPhInqM0DSQQCr7W3LO5B_MmuDqGtpBRvaXydja58Z0eT2tQfXd_CYKGdbJ18XWO-Zn';
+const REEL_IMAGE = 'https://lh3.googleusercontent.com/aida-public/AB6AXuCt8NYkfnl2XEqB1wisQc0EF1T4PohbXofU1zfwIoJuPb7WAf53F7F87Ldixnb0ETYlvHi2yg407INtoB-LxQ6ImYvG-Xa-fpVKSMOV-BNkk89kKvE0J5N_fdkTHhpKn1Mn9ft51or48fOuiS8Z5bnhcRYLIvortvMnPRc5yKlQzaELr13ngFL4PfkFQs1ymLJx_rWhXSL1Bq0Z31WO5r4vEC9IgoroHemmefNNoqgEOsZiUduOXRZMA3oa5D4qcUj8x1PPwIyYxm5-';
+const CREATOR_AVATAR = 'https://lh3.googleusercontent.com/aida-public/AB6AXuA1-DEG1XpJ-O59KQRBzReTZbcMFgN0XprUnmtx1s1bt9lak2gDPXAZ8JSdyvufPhAsSTkf5F0DFmEoSwEva38mfHQDDWz3Br4tYJNPhbF39JJQ5zdbp-uj2MaH5V-r875b6BkYkKD_qKn25A3msdb8Xl2WcsOtcPLuT-reyb0d1MWLdXwqbBHyWw4iAs3P9gCHZFhVelQFk0Bi8WzyOgCYnrZffJ3OP5MYwu3LZw9fEPsdhwTG9UtqSpiDxaBMmJeSQh_M81mK07x3';
 
 export default function ReelsScreen() {
   const [reels, setReels] = useState([]);
@@ -31,98 +30,105 @@ export default function ReelsScreen() {
 
   const currentReel = reels[0] || {
     title: 'What is Compound Interest?',
-    description: 'Compound interest is interest calculated on the principal amount and also on the accumulated interest of previous periods. It is often called the "eighth wonder of the world".',
+    description: 'Learn how your money grows exponentially over time and why starting early is the key to wealth... #finance #learning',
     points_reward: 50,
     duration_seconds: 143,
   };
   const totalPts = points?.available_points ?? 1250;
-  const progressPct = 37;
-  const currentTime = '0:37';
-  const totalTime = '2:23';
+  const progressPct = 65;
 
   return (
     <View style={styles.container}>
-      {/* Full screen video background */}
+      {/* Video background layer */}
       <View style={styles.videoWrap}>
         <ImageBackground
           source={{ uri: REEL_IMAGE }}
           style={styles.videoBg}
           resizeMode="cover"
-        >
-          <View style={styles.playOverlay}>
-            <View style={styles.playBtnCircle}>
-              <Ionicons name="play" size={48} color="rgba(255,255,255,0.4)" />
-            </View>
-          </View>
-        </ImageBackground>
+        />
         <View style={styles.gradientTop} />
         <View style={styles.gradientBottom} />
       </View>
 
-      {/* Top header */}
+      {/* Top header: For You / Following + search + points pill */}
       <View style={styles.topBar}>
-        <TouchableOpacity style={styles.topBtn}>
-          <Ionicons name="arrow-back" size={24} color="#fff" />
-        </TouchableOpacity>
-        <View style={styles.pointsPill}>
-          <Ionicons name="cash" size={18} color="#facc15" />
-          <Text style={styles.pointsPillText}>{totalPts.toLocaleString()} pts</Text>
+        <View style={styles.tabsRow}>
+          <TouchableOpacity style={styles.tabActive}>
+            <Text style={styles.tabActiveText}>For You</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.tab}>
+            <Text style={styles.tabText}>Following</Text>
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity style={styles.topBtn}>
-          <Ionicons name="ellipsis-vertical" size={24} color="#fff" />
-        </TouchableOpacity>
+        <View style={styles.topRightRow}>
+          <TouchableOpacity style={styles.iconBtn}>
+            <Ionicons name="search" size={24} color="#fff" />
+          </TouchableOpacity>
+          <View style={styles.pointsPill}>
+            <Ionicons name="trophy" size={18} color="#fff" />
+            <Text style={styles.pointsPillText}>+{currentReel.points_reward ?? 50} PTS</Text>
+          </View>
+        </View>
       </View>
 
-      {/* Right sidebar */}
+      {/* Middle: tap to pause / play */}
+      <View style={styles.middleArea}>
+        <View style={styles.playBtnCircle}>
+          <Ionicons name="play" size={56} color="rgba(255,255,255,0.4)" />
+        </View>
+      </View>
+
+      {/* Right sidebar: avatar + follow, like, comment, share, bookmark */}
       <View style={styles.sidebar}>
         <View style={styles.creatorWrap}>
-          <View style={styles.creatorAvatar} />
+          <Image source={{ uri: CREATOR_AVATAR }} style={styles.creatorAvatar} />
           <View style={styles.followBadge}>
-            <Ionicons name="add" size={12} color="#fff" />
+            <Ionicons name="add" size={14} color="#fff" />
           </View>
         </View>
         <View style={styles.sideItem}>
-          <Ionicons name="heart" size={32} color="#fff" />
-          <Text style={styles.sideCount}>1.2k</Text>
+          <TouchableOpacity>
+            <Ionicons name="heart" size={32} color="#fff" />
+          </TouchableOpacity>
+          <Text style={styles.sideCount}>12.5k</Text>
         </View>
         <View style={styles.sideItem}>
-          <Ionicons name="chatbubble" size={32} color="#fff" />
-          <Text style={styles.sideCount}>85</Text>
+          <TouchableOpacity>
+            <Ionicons name="chatbubble" size={32} color="#fff" />
+          </TouchableOpacity>
+          <Text style={styles.sideCount}>856</Text>
         </View>
         <View style={styles.sideItem}>
-          <Ionicons name="share" size={32} color="#fff" />
-          <Text style={styles.sideCount}>430</Text>
+          <TouchableOpacity>
+            <Ionicons name="share" size={32} color="#fff" />
+          </TouchableOpacity>
+          <Text style={styles.sideCount}>2.1k</Text>
         </View>
-        <View style={styles.earnBadge}>
-          <Ionicons name="star" size={24} color="#fff" />
-          <Text style={styles.earnBadgeText}>+50 PTS</Text>
+        <View style={styles.sideItem}>
+          <TouchableOpacity>
+            <Ionicons name="bookmark" size={32} color="#fff" />
+          </TouchableOpacity>
+          <Text style={styles.sideCount}>Save</Text>
         </View>
       </View>
 
-      {/* Bottom content overlay */}
+      {/* Bottom content */}
       <View style={styles.bottomOverlay}>
         <View style={styles.bottomContent}>
           <Text style={styles.reelTitle} numberOfLines={1}>{currentReel.title}</Text>
           <Text style={styles.reelDesc} numberOfLines={2}>{currentReel.description}</Text>
-          <TouchableOpacity style={styles.seeMoreRow}>
-            <Text style={styles.seeMoreText}>See more</Text>
-            <Ionicons name="chevron-down" size={16} color="#fff" />
-          </TouchableOpacity>
-        </View>
-        <View style={styles.audioRow}>
-          <Ionicons name="musical-notes" size={16} color="rgba(255,255,255,0.8)" />
-          <Text style={styles.audioText} numberOfLines={1}>
-            Original Audio - İş-Gen Academy • Financial Basics Series
-          </Text>
-        </View>
-        <View style={styles.progressRow}>
-          <Text style={styles.timeText}>{currentTime}</Text>
-          <View style={styles.progressTrack}>
-            <View style={[styles.progressFill, { width: `${progressPct}%` }]}>
-              <View style={styles.playhead} />
-            </View>
+          <View style={styles.audioRow}>
+            <Ionicons name="musical-notes" size={14} color={COLORS.primary} />
+            <Text style={styles.audioText} numberOfLines={1}>
+              Original Sound - EduFinance Academy
+            </Text>
           </View>
-          <Text style={styles.timeText}>{totalTime}</Text>
+        </View>
+        {/* Progress bar */}
+        <View style={styles.progressWrap}>
+          <View style={styles.progressTrack}>
+            <View style={[styles.progressFill, { width: `${progressPct}%` }]} />
+          </View>
         </View>
       </View>
     </View>
@@ -138,78 +144,106 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   videoWrap: { ...StyleSheet.absoluteFillObject },
-  videoBg: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  playOverlay: { position: 'absolute' },
-  playBtnCircle: { backgroundColor: 'rgba(0,0,0,0.2)', padding: 24, borderRadius: 9999 },
+  videoBg: { flex: 1 },
   gradientTop: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     height: '35%',
-    backgroundColor: 'rgba(0,0,0,0.45)',
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   gradientBottom: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    height: '40%',
-    backgroundColor: 'rgba(0,0,0,0.45)',
+    height: '45%',
+    backgroundColor: 'rgba(0,0,0,0.8)',
   },
   topBar: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
-    zIndex: 20,
+    zIndex: 10,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingTop: 24,
-    paddingBottom: 8,
+    paddingTop: 48,
+    paddingBottom: 12,
   },
-  topBtn: {
+  tabsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  tabActive: {
+    borderBottomWidth: 2,
+    borderBottomColor: COLORS.primary,
+    paddingBottom: 4,
+  },
+  tabActiveText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  tab: {},
+  tabText: { color: 'rgba(255,255,255,0.8)', fontSize: 16, fontWeight: '600' },
+  topRightRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  iconBtn: {
     width: 40,
     height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(0,0,0,0.2)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   pointsPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
     paddingHorizontal: 12,
     paddingVertical: 6,
-    backgroundColor: 'rgba(255,255,255,0.1)',
+    backgroundColor: COLORS.primary,
     borderRadius: RADIUS.full,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.2)',
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
   },
-  pointsPillText: { color: '#fff', fontSize: 14, fontWeight: '700' },
+  pointsPillText: { color: '#fff', fontSize: 12, fontWeight: '700' },
+  middleArea: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 5,
+  },
+  playBtnCircle: {
+    backgroundColor: 'rgba(0,0,0,0.2)',
+    padding: 16,
+    borderRadius: 9999,
+  },
   sidebar: {
     position: 'absolute',
     right: 16,
-    bottom: 140,
-    zIndex: 20,
+    bottom: 120,
+    zIndex: 10,
     alignItems: 'center',
     gap: 24,
   },
-  creatorWrap: { position: 'relative', marginBottom: 8 },
+  creatorWrap: { position: 'relative' },
   creatorAvatar: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#94a3b8',
     borderWidth: 2,
-    borderColor: '#fff',
+    borderColor: COLORS.primary,
+    backgroundColor: '#94a3b8',
   },
   followBadge: {
     position: 'absolute',
-    bottom: -4,
+    bottom: -8,
     left: '50%',
     marginLeft: -10,
     width: 20,
@@ -221,52 +255,36 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  sideItem: { alignItems: 'center' },
-  sideCount: { color: '#fff', fontSize: 12, fontWeight: '600', marginTop: 2 },
-  earnBadge: {
-    marginTop: 16,
-    backgroundColor: 'rgba(0,51,153,0.9)',
-    paddingVertical: 10,
-    paddingHorizontal: 10,
-    borderRadius: RADIUS.xl,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.2)',
-    alignItems: 'center',
-  },
-  earnBadgeText: { color: '#fff', fontSize: 10, fontWeight: '800', marginTop: 4, letterSpacing: 0.5 },
+  sideItem: { alignItems: 'center', gap: 2 },
+  sideCount: { color: '#fff', fontSize: 12, fontWeight: '700' },
   bottomOverlay: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    zIndex: 20,
+    zIndex: 10,
     paddingHorizontal: 16,
-    paddingBottom: 24,
-    paddingTop: 16,
+    paddingBottom: 88,
+    paddingTop: 12,
   },
   bottomContent: { maxWidth: '80%' },
-  reelTitle: { color: '#fff', fontSize: 18, fontWeight: '700', marginBottom: 4 },
+  reelTitle: { color: '#fff', fontSize: 20, fontWeight: '700', marginBottom: 8 },
   reelDesc: { color: 'rgba(255,255,255,0.9)', fontSize: 14, lineHeight: 20 },
-  seeMoreRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 8 },
-  seeMoreText: { color: '#fff', fontSize: 14, fontWeight: '700' },
   audioRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    marginTop: 16,
+    gap: 8,
+    marginTop: 8,
   },
-  audioText: { color: 'rgba(255,255,255,0.8)', fontSize: 12, flex: 1 },
-  progressRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 24,
-    gap: 12,
+  audioText: { color: COLORS.primary, fontSize: 12, fontWeight: '500', flex: 1 },
+  progressWrap: {
+    marginTop: 8,
+    paddingVertical: 8,
   },
-  timeText: { color: '#fff', fontSize: 10, fontWeight: '500' },
   progressTrack: {
-    flex: 1,
     height: 4,
-    backgroundColor: 'rgba(255,255,255,0.3)',
+    width: '100%',
+    backgroundColor: 'rgba(255,255,255,0.2)',
     borderRadius: 2,
     overflow: 'hidden',
   },
@@ -274,16 +292,5 @@ const styles = StyleSheet.create({
     height: '100%',
     backgroundColor: COLORS.primary,
     borderRadius: 2,
-    position: 'relative',
-  },
-  playhead: {
-    position: 'absolute',
-    right: 0,
-    top: '50%',
-    marginTop: -4,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#fff',
   },
 });

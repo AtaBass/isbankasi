@@ -18,6 +18,8 @@ export const COLORS = {
   orangeLight: '#fff7ed',
   pink: '#ec4899',
   purple: '#8b5cf6',
+  yellow: { 100: '#fef9c3', 600: '#ca8a04' },
+  blue: { 100: '#dbeafe', 600: '#2563eb' },
 };
 
 export const FONTS = {
